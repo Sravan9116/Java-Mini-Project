@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Submit Water Usage</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+    <h1>Submit Water Usage</h1>
+
+    <div class="form-container">
+        <input type="text" id="location" placeholder="Enter Location">
+        <input type="number" id="waterConsumed" placeholder="Water Consumed (Liters)">
+        <button onclick="submitWaterUsage()">Submit</button>
+    </div>
+
+    <a href="index.html">Go to Dashboard</a>
+
+    <script>
+        function submitWaterUsage() {
+            const location = document.getElementById("location").value;
+            const waterConsumed = document.getElementById("waterConsumed").value;
+
+            if (!location || !waterConsumed) {
+                alert("Please fill in all fields!");
+                return;
+            }
+
+            const newUsage = {
+                location: location,
+                waterConsumed: parseFloat(waterConsumed),
+                timestamp: new Date().toISOString()
+            };
+
+            fetch("http://localhost:8080/api/water/usage", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(newUsage)
+            })
+                .then(response => response.json())
+                .then(data => {
+                    alert("Water usage submitted successfully!");
+                    document.getElementById("location").value = "";
+                    document.getElementById("waterConsumed").value = "";
+                })
+                .catch(error => console.error("Error submitting data:", error));
+        }
+    </script>
+</body>
+
+</html>

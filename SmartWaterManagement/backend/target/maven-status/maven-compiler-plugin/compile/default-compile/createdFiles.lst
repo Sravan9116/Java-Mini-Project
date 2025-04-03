@@ -1,0 +1,5 @@
+com\smartwater\models\WaterUsage.class
+com\smartwater\repository\WaterUsageRepository.class
+com\smartwater\services\WaterUsageService.class
+com\smartwater\WaterManagementApplication.class
+com\smartwater\controllers\WaterUsageController.class
