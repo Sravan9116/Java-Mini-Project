@@ -2,22 +2,50 @@
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>City-wise Water Information</title>
-    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="styles.css" />
 </head>
 
 <body>
+    <nav>
+        <ul>
+            <li><a href="index.html">Dashboard</a></li>
+            <li><a href="submit.html">Submit</a></li>
+            <li><a href="about.html">About</a></li>
+            <li><a href="contact.html">Contact</a></li>
+        </ul>
+    </nav>
+
     <h1>Water Availability in Different Cities</h1>
 
-    <div class="city-info">
-        <p><strong>Guntur:</strong> 500,000 Liters available</p>
-        <p><strong>Hyderabad:</strong> 1,200,000 Liters available</p>
-        <p><strong>Bangalore:</strong> 900,000 Liters available</p>
+    <div class="city-info" id="city-info">
+        <h2>City Water Availability</h2>
+        <!-- Data will be loaded here -->
     </div>
 
-    <a href="index.html">Go to Dashboard</a>
+    <script>
+        function updateCityInfoDisplay() {
+            const infoDiv = document.getElementById("city-info");
+            infoDiv.innerHTML = "<h2>City Water Availability</h2>"; // Reset content
+
+            const cityData = JSON.parse(localStorage.getItem("cityWaterData")) || [];
+
+            if (cityData.length === 0) {
+                infoDiv.innerHTML += "<p>No data submitted yet.</p>";
+                return;
+            }
+
+            cityData.forEach(item => {
+                const para = document.createElement("p");
+                para.innerHTML = `<strong>${item.city}:</strong> ${Number(item.water).toLocaleString()} Liters available`;
+                infoDiv.appendChild(para);
+            });
+        }
+
+        document.addEventListener("DOMContentLoaded", updateCityInfoDisplay);
+    </script>
 </body>
 
 </html>

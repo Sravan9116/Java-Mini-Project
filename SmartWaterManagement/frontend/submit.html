@@ -2,51 +2,139 @@
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Submit Water Usage</title>
-    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="styles.css" />
 </head>
 
 <body>
-    <h1>Submit Water Usage</h1>
+    <nav>
+        <ul>
+            <li><a href="index.html">Dashboard</a></li>
+            <li><a href="cities.html">Cities</a></li>
+        </ul>
+    </nav>
 
     <div class="form-container">
-        <input type="text" id="location" placeholder="Enter Location">
-        <input type="number" id="waterConsumed" placeholder="Water Consumed (Liters)">
+        <h1>Submit Water Usage</h1>
+        <input type="text" id="location" placeholder="Enter Location" />
+        <input type="number" id="waterConsumed" placeholder="Water Consumed (Liters)" />
+        <br />
         <button onclick="submitWaterUsage()">Submit</button>
     </div>
 
-    <a href="index.html">Go to Dashboard</a>
+    <div class="form-container">
+        <h1>Submit Total Water Availability in Cities</h1>
+        <input type="text" id="city" placeholder="Enter City Name" />
+        <input type="number" id="waterAvailable" placeholder="Water Available (Liters)" />
+        <br />
+        <button onclick="submitCityWaterAvailability()">Submit</button>
+        <button onclick="resetCityWaterAvailability()">Reset</button>
+    </div>
 
     <script>
-        function submitWaterUsage() {
-            const location = document.getElementById("location").value;
-            const waterConsumed = document.getElementById("waterConsumed").value;
+        const allowedCities = ["Hyderabad", "Guntur", "Bangalore", "Vijayawada", "Visakhapatnam"];
 
-            if (!location || !waterConsumed) {
-                alert("Please fill in all fields!");
+        function submitWaterUsage() {
+            const location = document.getElementById("location").value.trim();
+            const waterConsumed = parseFloat(document.getElementById("waterConsumed").value.trim());
+
+            if (!location || isNaN(waterConsumed)) {
+                alert("Please fill in all fields correctly!");
                 return;
             }
 
-            const newUsage = {
-                location: location,
-                waterConsumed: parseFloat(waterConsumed),
-                timestamp: new Date().toISOString()
-            };
+            const matchedCity = allowedCities.find(city => city.toLowerCase() === location.toLowerCase());
 
-            fetch("http://localhost:8080/api/water/usage", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(newUsage)
-            })
-                .then(response => response.json())
-                .then(data => {
-                    alert("Water usage submitted successfully!");
-                    document.getElementById("location").value = "";
-                    document.getElementById("waterConsumed").value = "";
-                })
-                .catch(error => console.error("Error submitting data:", error));
+            if (!matchedCity) {
+                alert("Please enter a valid city name.");
+                return;
+            }
+
+            let cityData = JSON.parse(localStorage.getItem("cityWaterData")) || [];
+
+            let found = false;
+            cityData = cityData.map(item => {
+                if (item.city.toLowerCase() === matchedCity.toLowerCase()) {
+                    found = true;
+                    let remaining = item.water - waterConsumed;
+                    if (remaining < 0) remaining = 0;
+                    return { ...item, water: remaining };
+                }
+                return item;
+            });
+
+            if (!found) {
+                alert("City not found in availability data. Please submit city info first.");
+            }
+
+            localStorage.setItem("cityWaterData", JSON.stringify(cityData));
+            alert("Water usage submitted successfully!");
+
+            document.getElementById("location").value = "";
+            document.getElementById("waterConsumed").value = "";
+        }
+
+        function submitCityWaterAvailability() {
+            const city = document.getElementById("city").value.trim();
+            const water = parseFloat(document.getElementById("waterAvailable").value.trim());
+
+            const matchedCity = allowedCities.find(c => c.toLowerCase() === city.toLowerCase());
+
+            if (!matchedCity) {
+                alert("Please enter a valid city name.");
+                return;
+            }
+
+            if (!city || isNaN(water) || water <= 0) {
+                alert("Please fill in both fields with valid data.");
+                return;
+            }
+
+            let cityData = JSON.parse(localStorage.getItem("cityWaterData")) || [];
+            let cityExists = false;
+
+            cityData = cityData.map(item => {
+                if (item.city.toLowerCase() === city.toLowerCase()) {
+                    cityExists = true;
+                    return {
+                        city: item.city,
+                        water: parseFloat(item.water) + water
+                    };
+                }
+                return item;
+            });
+
+            if (!cityExists) {
+                cityData.push({ city: matchedCity, water: water });
+            }
+
+            localStorage.setItem("cityWaterData", JSON.stringify(cityData));
+            alert(`Water availability for ${matchedCity} submitted successfully!`);
+
+            document.getElementById("city").value = "";
+            document.getElementById("waterAvailable").value = "";
+        }
+
+        function resetCityWaterAvailability() {
+            const city = document.getElementById("city").value.trim();
+            const matchedCity = allowedCities.find(c => c.toLowerCase() === city.toLowerCase());
+
+            if (!matchedCity) {
+                alert("Please enter a valid city name.");
+                return;
+            }
+
+            let cityData = JSON.parse(localStorage.getItem("cityWaterData")) || [];
+
+            cityData = cityData.filter(item => item.city.toLowerCase() !== city.toLowerCase());
+
+            localStorage.setItem("cityWaterData", JSON.stringify(cityData));
+            alert(`${matchedCity} data has been reset.`);
+
+            document.getElementById("city").value = "";
+            document.getElementById("waterAvailable").value = "";
         }
     </script>
 </body>
