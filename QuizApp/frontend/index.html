@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz App</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <div class="quiz-container">
+        <h1>Simple Quiz</h1>
+        <form id="quiz-form">
+            <div class="question">
+                <label for="q1-option1">1. What is the capital of France?</label><br>
+                <input type="radio" id="q1-option1" name="q1" value="London" title="London"> London<br>
+                <input type="radio" id="q1-option2" name="q1" value="Paris" title="Paris"> Paris<br>
+                <input type="radio" id="q1-option3" name="q1" value="Berlin" title="Berlin"> Berlin<br>
+            </div>
+            <div class="question">
+                <label for="q2-option1">2. What is 5 + 3?</label><br>
+                <input type="radio" id="q2-option1" name="q2" value="7" title="7"> 7<br>
+                <input type="radio" id="q2-option2" name="q2" value="8" title="8">
+                8<br>
+                <input type="radio" id="q2-option3" name="q2" value="9" title="9"> 9<br>
+            </div>
+            <button type="submit">Submit</button>
+        </form>
+        <div id="result"></div>
+    </div>
+    <script src="script.js"></script>
+</body>
+
+</html>
