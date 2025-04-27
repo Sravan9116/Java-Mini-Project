@@ -21,16 +21,16 @@
         <input type="text" id="location" placeholder="Enter Location" />
         <input type="number" id="waterConsumed" placeholder="Water Consumed (Liters)" />
         <br />
-        <button onclick="submitWaterUsage()">Submit</button>
+        <button onclick="submitWaterUsage()">Submit Water Usage</button>
     </div>
 
     <div class="form-container">
-        <h1>Submit Total Water Availability in Cities</h1>
+        <h1>Manage City Water Availability</h1>
         <input type="text" id="city" placeholder="Enter City Name" />
         <input type="number" id="waterAvailable" placeholder="Water Available (Liters)" />
         <br />
-        <button onclick="submitCityWaterAvailability()">Submit</button>
-        <button onclick="resetCityWaterAvailability()">Reset</button>
+        <button onclick="submitCityWaterAvailability()">Add Water Availability</button>
+        <button onclick="resetCityWaterAvailability()">Reset City Data</button>
     </div>
 
     <script>
@@ -52,8 +52,8 @@
                 return;
             }
 
+            // Update localStorage
             let cityData = JSON.parse(localStorage.getItem("cityWaterData")) || [];
-
             let found = false;
             cityData = cityData.map(item => {
                 if (item.city.toLowerCase() === matchedCity.toLowerCase()) {
@@ -67,13 +67,41 @@
 
             if (!found) {
                 alert("City not found in availability data. Please submit city info first.");
+                return;
             }
 
             localStorage.setItem("cityWaterData", JSON.stringify(cityData));
-            alert("Water usage submitted successfully!");
 
-            document.getElementById("location").value = "";
-            document.getElementById("waterConsumed").value = "";
+            // Send POST request to backend
+            const newUsage = {
+                location: matchedCity,
+                waterConsumed: waterConsumed,
+                timestamp: new Date().toISOString()
+            };
+
+            fetch("http://localhost:8080/api/water/usage", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(newUsage)
+            })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! Status: ${response.status}`);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    console.log("Water usage added to server:", data);
+                    alert("Water usage submitted successfully!");
+                    document.getElementById("location").value = "";
+                    document.getElementById("waterConsumed").value = "";
+                })
+                .catch(error => {
+                    console.error("Error submitting to server:", error);
+                    alert("Error submitting water usage to server!");
+                });
         }
 
         function submitCityWaterAvailability() {
@@ -127,7 +155,6 @@
             }
 
             let cityData = JSON.parse(localStorage.getItem("cityWaterData")) || [];
-
             cityData = cityData.filter(item => item.city.toLowerCase() !== city.toLowerCase());
 
             localStorage.setItem("cityWaterData", JSON.stringify(cityData));
